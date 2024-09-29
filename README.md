@@ -86,11 +86,8 @@ For a directory with the following structure:
 my_folder/
 
 ├── sub_folder1/
-
 │ └── file1.txt
-
 ├── sub_folder2/
-
 └── file2.txt
 
 ```
@@ -111,17 +108,16 @@ The output will be:
 
   
 
-📁 **my_folder**
+📁 my_folder
 
-  
 
-- 📁 **sub_folder1**
+- 📁 sub_folder1
 
-- 📄 file1.txt
+    - 📄 file1.txt
 
-- 📁 **sub_folder2**
+- 📁 sub_folder2
 
-- 📄 file2.txt
+    - 📄 file2.txt
 
 ```
 
@@ -139,15 +135,10 @@ Directory Structure for my_folder
 
 my_folder
 
-  
-
 - [Folder] sub_folder1
-
-- [File] file1.txt
-
+  - [File] file1.txt
 - [Folder] sub_folder2
-
-- [File] file2.txt
+  - [File] file2.txt
 
 ```
 
