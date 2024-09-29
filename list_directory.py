@@ -64,7 +64,7 @@ if base_dir.exists() and base_dir.is_dir():
     markdown_file = result_md_dir / f"Directory structure {folder_name} {today_date}.md"
     markdown_file = get_unique_filename(markdown_file)
     
-    with markdown_file.open("w") as f_md:
+    with markdown_file.open("w", encoding="utf-8") as f_md:
         f_md.write(f"# Directory Structure for {folder_name}\n\n")
         f_md.write(f"📁 **{folder_name}**\n\n")  # Menambahkan nama folder utama
         f_md.write(markdown_content)
@@ -75,7 +75,7 @@ if base_dir.exists() and base_dir.is_dir():
     text_file = result_txt_dir / f"Directory structure {folder_name} {today_date}.txt"
     text_file = get_unique_filename(text_file)
     
-    with text_file.open("w") as f_txt:
+    with text_file.open("w", encoding="utf-8") as f_txt:
         f_txt.write(f"Directory Structure for {folder_name}\n\n")
         f_txt.write(f"{folder_name}\n\n")  # Menambahkan nama folder utama
         f_txt.write(text_content)
