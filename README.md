@@ -33,7 +33,7 @@ This Python script reads the directory structure of a given folder and outputs t
 
 ```bash
 
-git clone <repo-url>
+git clone https://github.com/ryshaal/folder-reader
 
 cd <repo-directory>
 
@@ -45,7 +45,7 @@ cd <repo-directory>
 
 ```bash
 
-python script.py
+python list_directory.py
 
 ```
 
