@@ -49,6 +49,12 @@ python list_directory.py
 
 ```
 
+```bash
+
+python list_directory_v2.py
+
+```
+
   
 
 3. Input the folder path when prompted:
