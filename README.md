@@ -47,7 +47,7 @@ cd folder-reader
 python list_directory.py
 
 ```
-
+or
 ```bash
 
 python list_directory_v2.py
