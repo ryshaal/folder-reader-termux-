@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
 from datetime import datetime
-import shutil
 import logging
 from tqdm import tqdm
 import json
+from colorama import Fore, Style
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -14,16 +14,30 @@ try:
     input_dir = input("Masukkan alamat folder yang ingin dibaca: ").strip()
     base_dir = Path(input_dir).resolve(strict=True)
 except FileNotFoundError:
-    logging.error(f"Error: Direktori '{input_dir}' tidak ditemukan.")
+    logging.error(f"{Fore.RED}Error: Direktori '{input_dir}' tidak ditemukan.{Style.RESET_ALL}")
     exit()
 except Exception as e:
-    logging.error(f"Error: {str(e)}")
+    logging.error(f"{Fore.RED}Error: {str(e)}{Style.RESET_ALL}")
     exit()
 
-# Lokasi folder result untuk menyimpan file Markdown, Teks, dan JSON
-result_md_dir = Path("result_md")
-result_txt_dir = Path("result_txt")
-result_json_dir = Path("result_json")
+# Meminta input dari pengguna untuk lokasi penyimpanan file
+use_custom_path = input("Apakah Anda ingin menggunakan lokasi penyimpanan sendiri? (y/n): ").strip().lower()
+
+if use_custom_path == 'y':
+    try:
+        save_path = input("Masukkan lokasi penyimpanan: ").strip()
+        result_md_dir = Path(save_path) / "result_md"
+        result_txt_dir = Path(save_path) / "result_txt"
+        result_json_dir = Path(save_path) / "result_json"
+    except Exception as e:
+        logging.error(f"{Fore.RED}Error: Lokasi penyimpanan tidak valid.{Style.RESET_ALL}")
+        exit()
+else:
+    result_md_dir = Path("result_md")
+    result_txt_dir = Path("result_txt")
+    result_json_dir = Path("result_json")
+
+# Membuat direktori jika belum ada
 result_md_dir.mkdir(exist_ok=True)
 result_txt_dir.mkdir(exist_ok=True)
 result_json_dir.mkdir(exist_ok=True)
@@ -32,28 +46,35 @@ result_json_dir.mkdir(exist_ok=True)
 total_files = 0
 total_folders = 0
 
+# Meminta pengguna memasukkan batas kedalaman pembacaan direktori
+try:
+    max_depth = int(input("Masukkan batas kedalaman direktori yang ingin dibaca (0 = tanpa batas): "))
+except ValueError:
+    logging.error(f"{Fore.RED}Error: Input tidak valid. Harap masukkan angka.{Style.RESET_ALL}")
+    exit()
+
 # Fungsi untuk membaca direktori dan subdirektorinya
 def list_directory(dir_path, level=0, for_markdown=True):
     global total_files, total_folders
     content = ""
     indent = "  " * level  # Indentasi untuk struktur folder
-    
-    items = list(dir_path.iterdir())  # Ambil list isi direktori
-    
-    for item in tqdm(items, desc=f"Processing {dir_path.name}", leave=False):
-        if item.is_dir():
-            total_folders += 1
-            if for_markdown:
-                content += f"{indent}- 📁 **{item.name}**\n"  # Markdown dengan tebal
+
+    if max_depth == 0 or level < max_depth:  # Cek batas kedalaman
+        items = list(dir_path.iterdir())  # Ambil list isi direktori
+        for item in tqdm(items, desc=f"Processing: {dir_path.name}", leave=True):
+            if item.is_dir():
+                total_folders += 1
+                if for_markdown:
+                    content += f"{indent}- 📁 **{item.name}**\n"  # Markdown dengan tebal
+                else:
+                    content += f"{indent}- [Folder] {item.name}\n"  # Teks biasa tanpa tebal
+                content += list_directory(item, level + 1, for_markdown)
             else:
-                content += f"{indent}- [Folder] {item.name}\n"  # Teks biasa tanpa tebal
-            content += list_directory(item, level + 1, for_markdown)
-        else:
-            total_files += 1
-            if for_markdown:
-                content += f"{indent}- 📄 {item.name}\n"  # Markdown
-            else:
-                content += f"{indent}- [File] {item.name}\n"  # Teks biasa
+                total_files += 1
+                if for_markdown:
+                    content += f"{indent}- 📄 {item.name}\n"  # Markdown
+                else:
+                    content += f"{indent}- [File] {item.name}\n"  # Teks biasa
     return content
 
 # Fungsi untuk menangani duplikasi file
@@ -67,9 +88,6 @@ def get_unique_filename(filepath):
         if not new_filepath.exists():
             return new_filepath
         i += 1
-
-# Ekstensi file yang diizinkan (opsional)
-ALLOWED_EXTENSIONS = {".txt", ".md"}  # Tambahkan atau kosongkan jika semua ekstensi ingin ditampilkan
 
 # Cek apakah direktori ada
 if base_dir.exists() and base_dir.is_dir():
@@ -90,7 +108,7 @@ if base_dir.exists() and base_dir.is_dir():
         f_md.write(f"📁 **{folder_name}**\n\n")  # Menambahkan nama folder utama
         f_md.write(markdown_content)
 
-    logging.info(f"Markdown saved as: {markdown_file}")
+    logging.info(f"SUKSES: {Fore.GREEN}{Style.BRIGHT}Markdown{Style.RESET_ALL} saved as: {Fore.BLUE}{markdown_file}{Style.RESET_ALL}")
     
     # Menyimpan file Teks
     text_file = result_txt_dir / f"Directory structure {folder_name} {today_date}.txt"
@@ -101,7 +119,7 @@ if base_dir.exists() and base_dir.is_dir():
         f_txt.write(f"{folder_name}\n\n")  # Menambahkan nama folder utama
         f_txt.write(text_content)
 
-    logging.info(f"Text file saved as: {text_file}")
+    logging.info(f"SUKSES: {Fore.GREEN}{Style.BRIGHT}Text file{Style.RESET_ALL} saved as: {Fore.BLUE}{text_file}{Style.RESET_ALL}")
     
     # Menyimpan file JSON
     json_file = result_json_dir / f"Directory structure {folder_name} {today_date}.json"
@@ -113,11 +131,11 @@ if base_dir.exists() and base_dir.is_dir():
             "structure": markdown_content  # atau text_content, sesuai kebutuhan
         }, f_json, ensure_ascii=False, indent=4)
 
-    logging.info(f"JSON file saved as: {json_file}")
+    logging.info(f"SUKSES: {Fore.GREEN}{Style.BRIGHT}JSON file{Style.RESET_ALL} saved as: {Fore.BLUE}{json_file}{Style.RESET_ALL}")
     
     # Tampilkan statistik
-    logging.info(f"Total files: {total_files}")
-    logging.info(f"Total folders: {total_folders}")
+    logging.info(f"SUKSES: {Fore.GREEN}{Style.BRIGHT}Total files{Style.RESET_ALL}: {total_files}")
+    logging.info(f"SUKSES: {Fore.GREEN}{Style.BRIGHT}Total folders{Style.RESET_ALL}: {total_folders}")
     
 else:
-    logging.error(f"Directory {base_dir} does not exist!")
+    logging.error(f"{Fore.RED}Error: Direktori {base_dir} tidak ditemukan!{Style.RESET_ALL}")
