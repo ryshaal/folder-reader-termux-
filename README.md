@@ -3,7 +3,7 @@
 
 # Directory Structure Reader
 
-  
+Folder Reader is a command-line tool that helps you analyze and understand your directory structures. It provides detailed information about files and folders in a specified directory, making it easier to manage and organize your files.
 
 This Python script reads the directory structure of a given folder and outputs the folder hierarchy in both **Markdown** and **Plain Text** formats. The generated files are saved into separate directories (`result_md` for Markdown and `result_txt` for plain text).
 
